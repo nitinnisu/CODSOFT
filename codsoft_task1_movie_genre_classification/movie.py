@@ -22,7 +22,7 @@ TEST_PATH  = "test_data.txt"
 SOL_PATH   = "test_data_solution.txt"
 OUT = r"c:\Users\nitin\OneDrive\Desktop\intern\task-1" 
 
-# ── 1. Load data ──────────────────────────────────────────────────────────────
+# Load data 
 def load_train(path):
     rows = []
     with open(path, encoding='utf-8', errors='ignore') as f:
@@ -47,12 +47,12 @@ def load_test(path):
 print("Loading data …")
 train_df = load_train(TRAIN_PATH)
 test_df  = load_test(TEST_PATH)
-sol_df   = load_train(SOL_PATH)   # solution file has genre column
+sol_df   = load_train(SOL_PATH)  
 
 print(f"Train: {len(train_df):,} rows | Test: {len(test_df):,} rows")
 print(f"Genres: {train_df['genre'].nunique()}")
 
-# Keep top 15 genres (removes rare categories that hurt metrics)
+# Keep top 15 genres
 TOP_N = 15
 top_genres = [g for g, _ in Counter(train_df['genre']).most_common(TOP_N)]
 train_df = train_df[train_df['genre'].isin(top_genres)].copy()
@@ -66,7 +66,7 @@ y_test  = test_df_merged['genre']
 
 print(f"After filtering — Train: {len(X_train):,} | Test: {len(X_test):,}")
 
-# ── 2. Pipelines ──────────────────────────────────────────────────────────────
+# Pipelines
 tfidf = TfidfVectorizer(max_features=60_000, ngram_range=(1, 2),
                         sublinear_tf=True, min_df=2)
 
@@ -90,7 +90,7 @@ best_name = max(results, key=lambda k: results[k]['f1'])
 best_preds = results[best_name]['preds']
 print(f"\nBest model: {best_name}")
 
-# ── 3. Colour palette ─────────────────────────────────────────────────────────
+# Colour palette
 PALETTE = sns.color_palette("tab20", TOP_N)
 genre_colors = dict(zip(sorted(top_genres), PALETTE))
 PLT_STYLE = {'axes.facecolor': '#f8f9fa', 'figure.facecolor': '#ffffff',
@@ -98,9 +98,9 @@ PLT_STYLE = {'axes.facecolor': '#f8f9fa', 'figure.facecolor': '#ffffff',
              'axes.spines.right': False}
 plt.rcParams.update(PLT_STYLE)
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # FIGURE 1 – Genre Distribution in Training Data
-# ══════════════════════════════════════════════════════════════════════════════
+
 genre_counts = train_df['genre'].value_counts()
 fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 fig.suptitle('Movie Genre Distribution – Training Data', fontsize=16, fontweight='bold', y=1.01)
@@ -132,9 +132,9 @@ plt.savefig(f"{OUT}/fig1_genre_distribution.png", dpi=150, bbox_inches='tight')
 plt.close()
 print("✓ Fig 1 saved")
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # FIGURE 2 – Model Comparison (Accuracy & F1)
-# ══════════════════════════════════════════════════════════════════════════════
+
 model_names = list(results.keys())
 accs = [results[m]['acc'] for m in model_names]
 f1s  = [results[m]['f1']  for m in model_names]
@@ -161,9 +161,9 @@ plt.savefig(f"{OUT}/fig2_model_comparison.png", dpi=150, bbox_inches='tight')
 plt.close()
 print("✓ Fig 2 saved")
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # FIGURE 3 – Confusion Matrix (Best Model)
-# ══════════════════════════════════════════════════════════════════════════════
+
 cm = confusion_matrix(y_test, best_preds, labels=sorted(top_genres))
 cm_norm = cm.astype(float) / cm.sum(axis=1, keepdims=True)
 
@@ -187,9 +187,9 @@ plt.savefig(f"{OUT}/fig3_confusion_matrix.png", dpi=150, bbox_inches='tight')
 plt.close()
 print("✓ Fig 3 saved")
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # FIGURE 4 – Per-Genre Precision, Recall, F1
-# ══════════════════════════════════════════════════════════════════════════════
+
 report = classification_report(y_test, best_preds,
                                 labels=sorted(top_genres),
                                 output_dict=True, zero_division=0)
@@ -214,9 +214,9 @@ plt.savefig(f"{OUT}/fig4_per_genre_metrics.png", dpi=150, bbox_inches='tight')
 plt.close()
 print("✓ Fig 4 saved")
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # FIGURE 5 – Top TF-IDF Features per Genre
-# ══════════════════════════════════════════════════════════════════════════════
+
 best_pipe = pipelines[best_name]
 vectorizer = best_pipe.named_steps['tfidf']
 clf        = best_pipe.named_steps['clf']
@@ -251,9 +251,9 @@ if hasattr(clf, 'coef_'):
 else:
     print("  (Skipping Fig 5 – model has no coef_)")
 
-# ══════════════════════════════════════════════════════════════════════════════
-# FIGURE 6 – Description Length Distribution by Genre
-# ══════════════════════════════════════════════════════════════════════════════
+
+# FIGURE 6 – Description Length Distribution by Genre 
+
 train_df['desc_len'] = train_df['description'].str.split().str.len()
 fig, ax = plt.subplots(figsize=(14, 6))
 data_by_genre = [train_df[train_df['genre'] == g]['desc_len'].values
@@ -273,9 +273,9 @@ plt.savefig(f"{OUT}/fig6_description_length.png", dpi=150, bbox_inches='tight')
 plt.close()
 print("✓ Fig 6 saved")
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # FIGURE 7 – F1 Score per Genre (all 3 models, grouped bars)
-# ══════════════════════════════════════════════════════════════════════════════
+
 fig, ax = plt.subplots(figsize=(16, 7))
 n_models = len(pipelines)
 x = np.arange(len(genres_sorted))
