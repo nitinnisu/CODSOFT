@@ -20,7 +20,7 @@ from sklearn.metrics import (
 )
 
 
-# 1. LOAD DATA
+# LOAD DATA
 
 df = pd.read_csv("Churn_Modelling.csv")
 
@@ -33,7 +33,7 @@ print(f"\nFeatures:\n{df.dtypes}")
 print(f"\nMissing values:\n{df.isnull().sum()}")
 
 
-# 2. EXPLORATORY DATA ANALYSIS (EDA)
+# EXPLORATORY DATA ANALYSIS (EDA)
 
 print("\n" + "=" * 60)
 print("EXPLORATORY DATA ANALYSIS")
@@ -116,7 +116,7 @@ plt.show()
 print("\nEDA plot saved → eda_plots.png")
 
 
-# 3. PREPROCESSING
+# PREPROCESSING
 df_model = df.drop(["RowNumber", "CustomerId", "Surname"], axis=1).copy()
 
 le = LabelEncoder()
@@ -141,7 +141,7 @@ print(f"Train : {X_train.shape[0]} rows | Test : {X_test.shape[0]} rows")
 print(f"Churn in train : {y_train.mean()*100:.1f}% | test : {y_test.mean()*100:.1f}%")
 
 
-# 4. MODEL TRAINING
+# MODEL TRAINING
 
 models = {
     "Logistic Regression": (
@@ -203,7 +203,7 @@ for name, (model, needs_scale) in models.items():
     print(classification_report(y_test, preds, target_names=["Retained", "Churned"]))
 
 
-# 5. COMPARISON PLOT
+# COMPARISON PLOT
 
 metrics    = ["accuracy", "precision", "recall", "f1", "roc_auc"]
 model_names = list(results.keys())
@@ -248,7 +248,7 @@ plt.show()
 print("Model comparison plot saved → model_comparison.png")
 
 
-# 6. CONFUSION MATRICES
+# CONFUSION MATRICES
 
 fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 fig.suptitle("Confusion Matrices", fontsize=16, fontweight="bold")
@@ -268,7 +268,7 @@ plt.show()
 print("Confusion matrices saved → confusion_matrices.png")
 
 
-# 7. FEATURE IMPORTANCE — Gradient Boosting
+# FEATURE IMPORTANCE — Gradient Boosting
 
 gb_model  = results["Gradient Boosting"]["model"]
 feat_imp  = pd.Series(gb_model.feature_importances_, index=X.columns).sort_values(ascending=True)
@@ -290,7 +290,7 @@ plt.show()
 print("Feature importance plot saved → feature_importance.png")
 
 
-# 8. BEST MODEL SUMMARY
+# BEST MODEL SUMMARY
 
 best_name  = max(results, key=lambda k: results[k]["roc_auc"])
 best       = results[best_name]
