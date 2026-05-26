@@ -28,7 +28,7 @@ from sklearn.preprocessing import LabelEncoder
 import re
 import string
 
-# 1. Load & Clean
+# Load & Clean
 
 df = pd.read_csv('spam.csv', encoding='latin-1')
 df = df[['v1', 'v2']].rename(columns={'v1': 'label', 'v2': 'message'})
@@ -37,13 +37,13 @@ print(f"Dataset shape: {df.shape}")
 print(f"\nClass distribution:\n{df['label'].value_counts()}")
 print(f"\nSpam ratio: {df['label'].value_counts(normalize=True)['spam']:.1%}")
 
-# 2. Text Preprocessing 
+# Text Preprocessing 
 
 def preprocess(text):
     text = text.lower()
-    text = re.sub(r'\d+', 'NUM', text)           # numbers → NUM
-    text = re.sub(r'http\S+|www\S+', 'URL', text) # URLs → URL
-    text = re.sub(r'[^\w\s]', ' ', text)           # strip punctuation
+    text = re.sub(r'\d+', 'NUM', text)      
+    text = re.sub(r'http\S+|www\S+', 'URL', text) 
+    text = re.sub(r'[^\w\s]', ' ', text)        
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
@@ -51,17 +51,17 @@ df['clean_msg'] = df['message'].apply(preprocess)
 
 # Encode labels: spam=1, ham=0
 le = LabelEncoder()
-y = le.fit_transform(df['label'])   # ham→0, spam→1
+y = le.fit_transform(df['label'])  
 X = df['clean_msg']
 
-# 3. Train / Test Split 
+# Train / Test Split 
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 print(f"\nTrain size: {len(X_train)}  |  Test size: {len(X_test)}")
 
-# 4. Build Pipelines 
+# Build Pipelines 
 
 tfidf_params = dict(
     max_features=10_000,
@@ -79,7 +79,7 @@ pipelines = {
                                        ('clf',  LinearSVC(C=1.0, max_iter=2000, random_state=42))]),
 }
 
-# 5. Train, Evaluate & Collect Metrics
+# Train, Evaluate & Collect Metrics
 
 results = {}
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -88,7 +88,7 @@ for name, pipe in pipelines.items():
     pipe.fit(X_train, y_train)
     y_pred = pipe.predict(X_test)
 
-    # SVM doesn't have predict_proba natively via LinearSVC
+
     if hasattr(pipe.named_steps['clf'], 'predict_proba'):
         y_prob = pipe.predict_proba(X_test)[:, 1]
     else:
@@ -112,7 +112,7 @@ for name, pipe in pipelines.items():
     print(f"\n── {name} ──")
     print(classification_report(y_test, y_pred, target_names=['Ham', 'Spam']))
 
-# 6. Visualisations 
+# Visualisations 
 
 COLORS = {
     'Naive Bayes':            '#6366f1',
@@ -243,7 +243,7 @@ plt.savefig('spam_detection_results.png',
             dpi=150, bbox_inches='tight', facecolor='#0f172a')
 print("\n✅ Chart saved.")
 
-# 7. Summary Table
+# Summary Table
 print("\n" + "="*70)
 print(f"{'Model':<28} {'Acc':>7} {'Prec':>7} {'Rec':>7} {'F1':>7} {'AUC':>7} {'CV-F1':>12}")
 print("="*70)
@@ -252,7 +252,7 @@ for name, res in results.items():
           f"{res['recall']:>7.4f} {res['f1']:>7.4f} {res['roc_auc']:>7.4f} "
           f"{res['cv_f1_mean']:>6.4f}±{res['cv_f1_std']:.4f}")
 
-# 8. Demo Predictions 
+# Demo Predictions 
 print("\n── Live Predictions (Best Model: SVM) ──")
 test_msgs = [
     "Congratulations! You've won a FREE iPhone. Click here to claim now!",
